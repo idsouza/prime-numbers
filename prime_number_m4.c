@@ -5,6 +5,12 @@
 #include <time.h>
 #include <sys/time.h>
 
+/*
+ * Author: Igor Duarte de Souza
+ * E-mail: igorduarte.s@gmail.com
+ * RA: 1931480
+ */
+
 #define MAX_NUMBER 5000000
 
 /*
