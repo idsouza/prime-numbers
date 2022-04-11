@@ -5,7 +5,13 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define MAX 5000000
+#define MAX_NUMBER 5000000
+
+/*
+ * Weights responsible for determining the load of ranges 
+ * allocated to a specific thread. This distribution aims to
+ * balance the algorithm complexity.
+ */
 #define THREAD_A_WEIGHT 0.50
 #define THREAD_B_WEIGHT 0.20
 #define THREAD_C_WEIGHT 0.15
@@ -47,16 +53,16 @@ void *prime_number(void *param) {
     }
     gettimeofday(&t2, 0);
 
-    printf("\nThread finish with %fs | Max number: %d\n\n", timediff(t1, t2), pi->max_number);
+    printf("\nThread finish with %fs | Max number: %d", timediff(t1, t2), pi->max_number);
 }
 
-int calc_range(int initial_number, int max_number, float weight) {
+int calc_max_number(int initial_number, int max_number, float weight) {
     return ((int) (max_number * weight)) + initial_number;
 }
 
-int calc_range_closed(int initial_number, int max_number, float weight, int thredhold) {
-    int max_number_aux = calc_range(initial_number, max_number, weight);
-    return max_number_aux - (max_number_aux - MAX);
+int calc_max_number_closed(int initial_number, int max_number, float weight, int thredhold) {
+    int max_number_aux = calc_max_number(initial_number, max_number, weight);
+    return max_number_aux - (max_number_aux - MAX_NUMBER);
 }
 
 void main(void) {
@@ -64,21 +70,23 @@ void main(void) {
     int max_number_aux = 0;
     
     pi1.current_number = 2;
-    pi1.max_number = calc_range(2, MAX, THREAD_A_WEIGHT);
+    pi1.max_number = calc_max_number(2, MAX_NUMBER, THREAD_A_WEIGHT);
 
     pi2.current_number = pi1.max_number + 1;
-    pi2.max_number = calc_range(pi2.current_number, MAX, THREAD_B_WEIGHT);
+    pi2.max_number = calc_max_number(pi2.current_number, MAX_NUMBER, THREAD_B_WEIGHT);
 
     pi3.current_number = pi2.max_number + 1;
-    pi3.max_number = calc_range(pi3.current_number, MAX, THREAD_C_WEIGHT);
+    pi3.max_number = calc_max_number(pi3.current_number, MAX_NUMBER, THREAD_C_WEIGHT);
 
     pi4.current_number = pi3.max_number + 1;;
-    pi4.max_number = calc_range_closed(pi4.current_number, MAX, THREAD_D_WEIGHT, MAX);
+    pi4.max_number = calc_max_number_closed(pi4.current_number, MAX_NUMBER, THREAD_D_WEIGHT, MAX_NUMBER);
 
-    printf("\n\nThread A: current: %d | Max: %d", pi1.current_number, pi1.max_number);
-    printf("\n\nThread B: current: %d | Max: %d", pi2.current_number, pi2.max_number);
-    printf("\n\nThread C: current: %d | Max: %d", pi3.current_number, pi3.max_number);
-    printf("\n\nThread D: current: %d | Max: %d\n\n", pi4.current_number, pi4.max_number);
+    
+    printf("\n### Thread range distribution");
+    printf("\nThread A: Current: %d | Max: %d", pi1.current_number, pi1.max_number);
+    printf("\n\nThread B: Current: %d | Max: %d", pi2.current_number, pi2.max_number);
+    printf("\n\nThread C: Current: %d | Max: %d", pi3.current_number, pi3.max_number);
+    printf("\n\nThread D: Current: %d | Max: %d\n\n", pi4.current_number, pi4.max_number);
 
     struct timeval t1, t2;
     pthread_t th1, th2, th3, th4;
